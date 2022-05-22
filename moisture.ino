@@ -1,8 +1,19 @@
+// libs required to display stuff on the 0.96" 128x64 OLED screen
+#include <SPI.h>
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+
+Adafruit_SSD1306 display(-1); // screen doesn't have a reset pin, so set to nonexisting -1 pin
+
+#define SCREEN_WIDTH = 128
+#define SCREEN_HEIGHT = 64
+
 #define SENSOR_ANALOG_READ A0
 #define SENSOR_POWER_PIN 7
 #define SENSOR_READINGS_COUNT 100
 #define SENSOR_POWER_ON_TIME 100 // milliseconds the sensor is on, no idea how much time it needs to take readings
-#define SENSOR_READ_INTERVAL 1000 * 5
+#define SENSOR_READ_INTERVAL 1000 * 2
 #define CALIBRATION_AIR_VALUE 990   // sensor goes to 1023 but after average of 100 readings value drops to ~990 because first readings are wrong
 #define CALIBRATION_WATER_VALUE 380 // seen my sensor readings vary from 260 to 400 when dipped in water
 
@@ -11,6 +22,8 @@ void setup()
   Serial.begin(9600);
   pinMode(SENSOR_ANALOG_READ, INPUT);
   pinMode(SENSOR_POWER_PIN, OUTPUT); // use if sensor is connected to a digital pin on the Arduino
+  // initialize with the I2C addr 0x3C
+  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
 }
 
 void loop()
@@ -54,6 +67,8 @@ void readAnalogAndPrint()
   Serial.print(", ");
   Serial.print(moisturePercent);
   Serial.println("%");
+
+  displayPercentage(moisturePercent); // show value on display
 }
 
 /**
@@ -71,4 +86,23 @@ int getAverageOfAnalogReadings(int readingsCount)
     delay(1);
   }
   return value / readingsCount;
+}
+
+/**
+ * Function to display the moisture percentage to a connected display
+ * @param percent
+ */
+void displayPercentage(int percent)
+{
+  // Display Text
+  display.clearDisplay();
+  display.setTextSize(1);
+  display.setCursor(0, 1);
+  display.setTextColor(WHITE);
+  display.println("MOISTURE");
+  display.setTextSize(2);
+  display.setCursor(0, 12);
+  display.print(percent);
+  display.println("%");
+  display.display();
 }
