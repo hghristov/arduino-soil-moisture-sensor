@@ -1,10 +1,10 @@
 #define SENSOR_ANALOG_READ A0
 #define SENSOR_POWER_PIN 7
-#define SENSOR_POWER_ON_TIME 50
-#define SENSOR_READ_INTERVAL 1000 * 5
 #define SENSOR_READINGS_COUNT 100
-#define CALIBRATION_AIR_VALUE 990
-#define CALIBRATION_WATER_VALUE 380
+#define SENSOR_POWER_ON_TIME 100 // milliseconds the sensor is on, no idea how much time it needs to take readings
+#define SENSOR_READ_INTERVAL 1000 * 5
+#define CALIBRATION_AIR_VALUE 990   // sensor goes to 1023 but after average of 100 readings value drops to ~990 because first readings are wrong
+#define CALIBRATION_WATER_VALUE 380 // seen my sensor readings vary from 260 to 400 when dipped in water
 
 void setup()
 {
@@ -22,8 +22,8 @@ void loop()
 
 /**
  * Function to dead analog data by powering the sensor only for a certain amount of time
- * This increases the sensor's life
- * To use, connect sensor to a digital pin
+ * This increases the sensor's life by only using it whenever we want to make a reading
+ * To be used when sensor is connected to a digital pin
  */
 void readAnalogInIntervals()
 {
@@ -64,7 +64,7 @@ void readAnalogAndPrint()
  */
 int getAverageOfAnalogReadings(int readingsCount)
 {
-  long value = 0;
+  long value = 0; // we're summing up potentially hundreds of values that go up to around 1000, so int is not enough
   for (int i = 0; i < readingsCount; i++)
   {
     value = value + analogRead(SENSOR_ANALOG_READ);
